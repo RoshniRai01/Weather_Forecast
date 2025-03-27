@@ -33,7 +33,7 @@ async function checkWeather(city) {
         const locationData = await response.json();
 
         // Check if the city was found
-        if (locationData.length === 0) {
+        if (!locationData || locationData.length === 0) {
             throw new Error("City not found");
         }
 
@@ -60,19 +60,19 @@ async function checkWeather(city) {
         // Update weather image based on condition
         const condition = currentWeather.weather_state_name.toLowerCase();
         if (weatherImg) {
+            let imageName = "default";
             if (condition.includes('cloud')) {
-                weatherImg.src = "cloud.png";  // Make sure to use correct image files or URLs
+                imageName = "cloud";
             } else if (condition.includes('sunny') || condition.includes('clear')) {
-                weatherImg.src = "clear.png";
+                imageName = "clear";
             } else if (condition.includes('rain')) {
-                weatherImg.src = "rain.png";
+                imageName = "rain";
             } else if (condition.includes('mist')) {
-                weatherImg.src = "mist.png";
+                imageName = "mist";
             } else if (condition.includes('snow')) {
-                weatherImg.src = "snow.png";
-            } else {
-                weatherImg.src = "default.png"; // Handle default or other conditions
+                imageName = "snow";
             }
+            weatherImg.src = `images/${imageName}.png`;  // Ensure this path is correct
         }
     } catch (error) {
         console.error("Error fetching weather data:", error);

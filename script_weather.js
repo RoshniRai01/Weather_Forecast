@@ -13,8 +13,8 @@ console.log("Entering JS Section");
 
 // Function to check weather
 async function checkWeather(city) {
-    const apiKey = "aa49c18f4fc849bd90934558242907"; // Replace with your actual API key
-    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`; // Use HTTPS here
+    const apiKey = "your_openweathermap_api_key_here"; // Replace with your OpenWeatherMap API key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`; // API URL
     console.log("Fetching from API");
 
     try {
@@ -22,7 +22,7 @@ async function checkWeather(city) {
         const weatherData = await response.json();
 
         // Check if location is found
-        if (weatherData.error) {
+        if (weatherData.cod !== 200) {
             console.log("Location not found");
             if (locationNotFound) locationNotFound.style.display = "flex";
             if (weatherBody) weatherBody.style.display = "none";
@@ -36,14 +36,14 @@ async function checkWeather(city) {
         if (weatherBody) weatherBody.style.display = "flex";
 
         // Update UI with weather data
-        if (temperature) temperature.innerHTML = `${Math.round(weatherData.current.temp_c)}°C`;
-        if (description) description.innerHTML = `${weatherData.current.condition.text}`;
-        if (humidity) humidity.innerHTML = `${weatherData.current.humidity}%`;
-        if (windSpeed) windSpeed.innerHTML = `${weatherData.current.wind_kph} Km/H`;
+        if (temperature) temperature.innerHTML = `${Math.round(weatherData.main.temp)}°C`;
+        if (description) description.innerHTML = `${weatherData.weather[0].description}`;
+        if (humidity) humidity.innerHTML = `${weatherData.main.humidity}%`;
+        if (windSpeed) windSpeed.innerHTML = `${weatherData.wind.speed} m/s`;
 
         // Update weather image based on condition
         if (weatherImg) {
-            const condition = weatherData.current.condition.text.toLowerCase(); // Convert to lowercase for consistency
+            const condition = weatherData.weather[0].description.toLowerCase();
 
             if (condition.includes('cloudy')) {
                 weatherImg.src = "cloud.png";

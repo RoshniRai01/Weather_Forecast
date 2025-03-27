@@ -13,7 +13,7 @@ console.log("Entering JS Section");
 
 // Function to check weather
 async function checkWeather(city) {
-    const searchUrl = `https://www.metaweather.com/api/location/search/?query=${city}`;
+    const searchUrl = `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/search/?query=${city}`;
     console.log("Fetching from API");
 
     try {
@@ -39,7 +39,7 @@ async function checkWeather(city) {
         console.log("Found location, WOEID:", woeid);
 
         // Fetch the weather data using the WOEID
-        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`;
+        const weatherUrl = `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`;
 
         const weatherResponse = await fetch(weatherUrl);
 

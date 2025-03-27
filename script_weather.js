@@ -16,13 +16,14 @@ async function checkWeather(city) {
         return;
     }
 
+    // URL to search the location by city name
     const url = `https://www.metaweather.com/api/location/search/?query=${city}`;
 
     try {
         // Fetch city weather data from MetaWeather API
         const response = await fetch(url);
 
-        // Handle errors for fetch
+        // Handle errors for fetch (e.g., no internet connection)
         if (!response.ok) {
             throw new Error("Failed to fetch weather data");
         }
@@ -58,7 +59,7 @@ async function checkWeather(city) {
         const condition = currentWeather.weather_state_name.toLowerCase();
         if (weatherImg) {
             if (condition.includes('cloud')) {
-                weatherImg.src = "cloud.png";
+                weatherImg.src = "cloud.png";  // Make sure to use correct image files or URLs
             } else if (condition.includes('sunny') || condition.includes('clear')) {
                 weatherImg.src = "clear.png";
             } else if (condition.includes('rain')) {

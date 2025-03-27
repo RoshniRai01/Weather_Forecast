@@ -16,11 +16,10 @@ async function checkWeather(city) {
         return;
     }
 
-    const apiKey = "c14997a93a5dafb568365fedcd9e2adf"; // Replace with your OpenWeatherMap API key
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    const url = `https://www.metaweather.com/api/location/search/?query=${city}`;
 
     try {
-        // Fetch city weather data from OpenWeatherMap API
+        // Fetch city weather data from MetaWeather API
         const response = await fetch(url);
 
         // Handle errors for fetch
@@ -28,29 +27,39 @@ async function checkWeather(city) {
             throw new Error("Failed to fetch weather data");
         }
 
-        const weatherData = await response.json();
+        const locationData = await response.json();
 
-        // Check if location is valid
-        if (weatherData.cod !== 200) {
+        // Check if the city was found
+        if (locationData.length === 0) {
             throw new Error("City not found");
         }
+
+        // Fetch weather details for the first location found
+        const woeid = locationData[0].woeid;
+        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`;
+
+        const weatherResponse = await fetch(weatherUrl);
+        const weatherData = await weatherResponse.json();
 
         // Hide "location not found" message and show weather body
         if (locationNotFound) locationNotFound.style.display = "none";
         if (weatherBody) weatherBody.style.display = "flex";
 
+        // Get the current weather details
+        const currentWeather = weatherData.consolidated_weather[0];
+
         // Update UI with weather data
-        temperature.innerHTML = `${Math.round(weatherData.main.temp)}°C`;
-        description.innerHTML = weatherData.weather[0].description;
-        humidity.innerHTML = `${weatherData.main.humidity}%`;
-        windSpeed.innerHTML = `${weatherData.wind.speed} m/s`;
+        temperature.innerHTML = `${Math.round(currentWeather.the_temp)}°C`;
+        description.innerHTML = currentWeather.weather_state_name;
+        humidity.innerHTML = `${currentWeather.humidity}%`;
+        windSpeed.innerHTML = `${currentWeather.wind_speed.toFixed(1)} m/s`;
 
         // Update weather image based on condition
-        const condition = weatherData.weather[0].description.toLowerCase();
+        const condition = currentWeather.weather_state_name.toLowerCase();
         if (weatherImg) {
             if (condition.includes('cloud')) {
                 weatherImg.src = "cloud.png";
-            } else if (condition.includes('sunny')) {
+            } else if (condition.includes('sunny') || condition.includes('clear')) {
                 weatherImg.src = "clear.png";
             } else if (condition.includes('rain')) {
                 weatherImg.src = "rain.png";

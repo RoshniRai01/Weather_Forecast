@@ -11,7 +11,7 @@ const weatherBody = document.querySelector('.weather-body');
 
 // Function to check weather
 async function checkWeather(city) {
-    const searchUrl = `https://www.metaweather.com/api/location/search/?query=${city}`;
+    const searchUrl = `https://www.metaweather.com/api/location/search/?query=${city}`; // Correct API URL
 
     try {
         // Step 1: Fetch the location data using the city name
@@ -31,7 +31,7 @@ async function checkWeather(city) {
         console.log("Found location, WOEID:", woeid);
 
         // Step 2: Fetch the weather data using the WOEID
-        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`;
+        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`; // Correct weather data URL
         const weatherResponse = await fetch(weatherUrl);
         const weatherData = await weatherResponse.json();
 

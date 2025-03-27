@@ -11,57 +11,42 @@ const weatherBody = document.querySelector('.weather-body');
 
 // Function to check weather
 async function checkWeather(city) {
-    // Check if the city is not empty
     if (!city) {
         alert("Please enter a city name.");
         return;
     }
 
-    const url = `https://www.metaweather.com/api/location/search/?query=${city}`; // MetaWeather API for city search
+    const apiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Replace with your OpenWeatherMap API key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
     try {
-        // Fetch city data from MetaWeather API
+        // Fetch city weather data from OpenWeatherMap API
         const response = await fetch(url);
 
         // Handle errors for fetch
         if (!response.ok) {
-            throw new Error("Failed to fetch city data");
-        }
-
-        const data = await response.json();
-
-        // Check if city is found in the response
-        if (data.length === 0) {
-            throw new Error("City not found");
-        }
-
-        // Get WOEID (Where On Earth ID) for the city
-        const woeid = data[0].woeid;
-        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`; // MetaWeather API for weather data
-
-        // Fetch weather data for the city
-        const weatherResponse = await fetch(weatherUrl);
-
-        // Handle errors for weather fetch
-        if (!weatherResponse.ok) {
             throw new Error("Failed to fetch weather data");
         }
 
-        const weatherData = await weatherResponse.json();
+        const weatherData = await response.json();
+
+        // Check if location is valid
+        if (weatherData.cod !== 200) {
+            throw new Error("City not found");
+        }
 
         // Hide "location not found" message and show weather body
         if (locationNotFound) locationNotFound.style.display = "none";
         if (weatherBody) weatherBody.style.display = "flex";
 
         // Update UI with weather data
-        const weatherInfo = weatherData.consolidated_weather[0];
-        temperature.innerHTML = `${Math.round(weatherInfo.the_temp)}°C`;
-        description.innerHTML = weatherInfo.weather_state_name;
-        humidity.innerHTML = `${weatherInfo.humidity}%`;
-        windSpeed.innerHTML = `${weatherInfo.wind_speed} m/s`;
+        temperature.innerHTML = `${Math.round(weatherData.main.temp)}°C`;
+        description.innerHTML = weatherData.weather[0].description;
+        humidity.innerHTML = `${weatherData.main.humidity}%`;
+        windSpeed.innerHTML = `${weatherData.wind.speed} m/s`;
 
         // Update weather image based on condition
-        const condition = weatherInfo.weather_state_name.toLowerCase();
+        const condition = weatherData.weather[0].description.toLowerCase();
         if (weatherImg) {
             if (condition.includes('cloud')) {
                 weatherImg.src = "cloud.png";

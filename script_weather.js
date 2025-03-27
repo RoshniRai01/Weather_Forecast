@@ -11,29 +11,47 @@ const weatherBody = document.querySelector('.weather-body');
 
 // Function to check weather
 async function checkWeather(city) {
+    // Check if the city is not empty
+    if (!city) {
+        alert("Please enter a city name.");
+        return;
+    }
+
     const url = `https://www.metaweather.com/api/location/search/?query=${city}`; // MetaWeather API for city search
 
     try {
+        // Fetch city data from MetaWeather API
         const response = await fetch(url);
+
+        // Handle errors for fetch
+        if (!response.ok) {
+            throw new Error("Failed to fetch city data");
+        }
+
         const data = await response.json();
 
+        // Check if city is found in the response
         if (data.length === 0) {
-            console.log("Location not found");
-            locationNotFound.style.display = "flex";
-            weatherBody.style.display = "none";
-            return;
+            throw new Error("City not found");
         }
 
         // Get WOEID (Where On Earth ID) for the city
         const woeid = data[0].woeid;
         const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`; // MetaWeather API for weather data
 
+        // Fetch weather data for the city
         const weatherResponse = await fetch(weatherUrl);
+
+        // Handle errors for weather fetch
+        if (!weatherResponse.ok) {
+            throw new Error("Failed to fetch weather data");
+        }
+
         const weatherData = await weatherResponse.json();
 
-        // Hide location not found and show weather body
-        locationNotFound.style.display = "none";
-        weatherBody.style.display = "flex";
+        // Hide "location not found" message and show weather body
+        if (locationNotFound) locationNotFound.style.display = "none";
+        if (weatherBody) weatherBody.style.display = "flex";
 
         // Update UI with weather data
         const weatherInfo = weatherData.consolidated_weather[0];
@@ -61,27 +79,26 @@ async function checkWeather(city) {
         }
     } catch (error) {
         console.error("Error fetching weather data:", error);
-        locationNotFound.style.display = "flex";
-        weatherBody.style.display = "none";
+
+        // Show "location not found" message and hide weather body
+        if (locationNotFound) locationNotFound.style.display = "flex";
+        if (weatherBody) weatherBody.style.display = "none";
+
+        // Display the error message
+        alert(error.message); // Optional: Display the error message in an alert
     }
 }
 
 // Add event listener to the search button
 searchBtn.addEventListener('click', () => {
     const city = inputBox.value.trim();
-    if (city) {
-        checkWeather(city);
-    } else {
-        alert("Please enter a city name.");
-    }
+    checkWeather(city);
 });
 
 // Allow pressing 'Enter' to search
 inputBox.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const city = inputBox.value.trim();
-        if (city) {
-            checkWeather(city);
-        }
+        checkWeather(city);
     }
 });

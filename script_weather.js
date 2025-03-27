@@ -13,7 +13,7 @@ console.log("Entering JS Section");
 // Function to check weather
 async function checkWeather(city) {
     const apiKey = "aa49c18f4fc849bd90934558242907"; // Replace with your actual API key
-    const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
     console.log("Fetching from API");
     try {
         const response = await fetch(url);

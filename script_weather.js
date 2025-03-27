@@ -9,15 +9,17 @@ const windSpeed = document.getElementById('wind-speed');
 const locationNotFound = document.querySelector('.location-not-found');
 const weatherBody = document.querySelector('.weather-body');
 
-// Function to check weather
+// Function to check weather using MetaWeather API (No API Key required)
 async function checkWeather(city) {
     if (!city) {
         alert("Please enter a city name.");
         return;
     }
 
-    // URL to search the location by city name
-    const url = `https://www.metaweather.com/api/location/search/?query=${city}`;
+    // CORS Proxy URL (you may need to request access for the first time)
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const apiUrl = `https://www.metaweather.com/api/location/search/?query=${city}`;
+    const url = proxyUrl + apiUrl;
 
     try {
         // Fetch city weather data from MetaWeather API

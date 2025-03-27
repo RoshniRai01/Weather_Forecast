@@ -9,43 +9,43 @@ const windSpeed = document.getElementById('wind-speed');
 const locationNotFound = document.querySelector('.location-not-found');
 const weatherBody = document.querySelector('.weather-body');
 
-console.log("Entering JS Section");
-
 // Function to check weather
 async function checkWeather(city) {
-    const apiKey = "your_openweathermap_api_key_here"; // Replace with your OpenWeatherMap API key
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`; // API URL
-    console.log("Fetching from API");
+    const url = `https://www.metaweather.com/api/location/search/?query=${city}`; // MetaWeather API for city search
 
     try {
         const response = await fetch(url);
-        const weatherData = await response.json();
+        const data = await response.json();
 
-        // Check if location is found
-        if (weatherData.cod !== 200) {
+        if (data.length === 0) {
             console.log("Location not found");
-            if (locationNotFound) locationNotFound.style.display = "flex";
-            if (weatherBody) weatherBody.style.display = "none";
+            locationNotFound.style.display = "flex";
+            weatherBody.style.display = "none";
             return;
         }
 
-        console.log("Weather data received");
+        // Get WOEID (Where On Earth ID) for the city
+        const woeid = data[0].woeid;
+        const weatherUrl = `https://www.metaweather.com/api/location/${woeid}/`; // MetaWeather API for weather data
+
+        const weatherResponse = await fetch(weatherUrl);
+        const weatherData = await weatherResponse.json();
 
         // Hide location not found and show weather body
-        if (locationNotFound) locationNotFound.style.display = "none";
-        if (weatherBody) weatherBody.style.display = "flex";
+        locationNotFound.style.display = "none";
+        weatherBody.style.display = "flex";
 
         // Update UI with weather data
-        if (temperature) temperature.innerHTML = `${Math.round(weatherData.main.temp)}°C`;
-        if (description) description.innerHTML = `${weatherData.weather[0].description}`;
-        if (humidity) humidity.innerHTML = `${weatherData.main.humidity}%`;
-        if (windSpeed) windSpeed.innerHTML = `${weatherData.wind.speed} m/s`;
+        const weatherInfo = weatherData.consolidated_weather[0];
+        temperature.innerHTML = `${Math.round(weatherInfo.the_temp)}°C`;
+        description.innerHTML = weatherInfo.weather_state_name;
+        humidity.innerHTML = `${weatherInfo.humidity}%`;
+        windSpeed.innerHTML = `${weatherInfo.wind_speed} m/s`;
 
         // Update weather image based on condition
+        const condition = weatherInfo.weather_state_name.toLowerCase();
         if (weatherImg) {
-            const condition = weatherData.weather[0].description.toLowerCase();
-
-            if (condition.includes('cloudy')) {
+            if (condition.includes('cloud')) {
                 weatherImg.src = "cloud.png";
             } else if (condition.includes('sunny')) {
                 weatherImg.src = "clear.png";
@@ -57,15 +57,12 @@ async function checkWeather(city) {
                 weatherImg.src = "snow.png";
             } else {
                 weatherImg.src = "default.png"; // Handle default or other conditions
-                console.log('Default image');
             }
         }
-
-        console.log(weatherData);
     } catch (error) {
         console.error("Error fetching weather data:", error);
-        if (locationNotFound) locationNotFound.style.display = "flex";
-        if (weatherBody) weatherBody.style.display = "none";
+        locationNotFound.style.display = "flex";
+        weatherBody.style.display = "none";
     }
 }
 
@@ -76,5 +73,15 @@ searchBtn.addEventListener('click', () => {
         checkWeather(city);
     } else {
         alert("Please enter a city name.");
+    }
+});
+
+// Allow pressing 'Enter' to search
+inputBox.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const city = inputBox.value.trim();
+        if (city) {
+            checkWeather(city);
+        }
     }
 });

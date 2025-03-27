@@ -10,24 +10,28 @@ const locationNotFound = document.querySelector('.location-not-found');
 const weatherBody = document.querySelector('.weather-body');
 
 console.log("Entering JS Section");
+
 // Function to check weather
 async function checkWeather(city) {
     const apiKey = "aa49c18f4fc849bd90934558242907"; // Replace with your actual API key
-    const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`; // Use HTTPS here
     console.log("Fetching from API");
+
     try {
         const response = await fetch(url);
         const weatherData = await response.json();
 
         // Check if location is found
         if (weatherData.error) {
+            console.log("Location not found");
             if (locationNotFound) locationNotFound.style.display = "flex";
             if (weatherBody) weatherBody.style.display = "none";
-            console.log("Location not found");
             return;
         }
 
         console.log("Weather data received");
+
+        // Hide location not found and show weather body
         if (locationNotFound) locationNotFound.style.display = "none";
         if (weatherBody) weatherBody.style.display = "flex";
 

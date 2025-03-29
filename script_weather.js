@@ -10,87 +10,58 @@ const locationNotFound = document.querySelector('.location-not-found');
 const weatherBody = document.querySelector('.weather-body');
 
 console.log("Entering JS Section");
-
 // Function to check weather
 async function checkWeather(city) {
-    const searchUrl = `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/search/?query=${city}`;
+    const apiKey = "a79bd6e3d4c6fd1e0e49081453c58eb0"; // Replace with your actual API key
+    const url = `http://api.openweatherapi.com/v1/current.json?key=${apiKey}&q=${city}`;
     console.log("Fetching from API");
-
     try {
-        const searchResponse = await fetch(searchUrl);
+        const response = await fetch(url);
+        const weatherData = await response.json();
 
-        // Check for network errors (non-2xx status codes)
-        if (!searchResponse.ok) {
-            throw new Error(`Failed to fetch data: ${searchResponse.statusText}`);
-        }
-
-        const searchData = await searchResponse.json();
-
-        // If no location is found, display the "Location not found" message
-        if (searchData.length === 0) {
+        // Check if location is found
+        if (weatherData.error) {
             if (locationNotFound) locationNotFound.style.display = "flex";
             if (weatherBody) weatherBody.style.display = "none";
             console.log("Location not found");
             return;
         }
 
-        // Get the WOEID (Where On Earth ID) for the first result
-        const woeid = searchData[0].woeid;
-        console.log("Found location, WOEID:", woeid);
+        console.log("Weather data received");
+        if (locationNotFound) locationNotFound.style.display = "none";
+        if (weatherBody) weatherBody.style.display = "flex";
 
-        // Fetch the weather data using the WOEID
-        const weatherUrl = `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`;
+        // Update UI with weather data
+        if (temperature) temperature.innerHTML = `${Math.round(weatherData.current.temp_c)}°C`;
+        if (description) description.innerHTML = `${weatherData.current.condition.text}`;
+        if (humidity) humidity.innerHTML = `${weatherData.current.humidity}%`;
+        if (windSpeed) windSpeed.innerHTML = `${weatherData.current.wind_kph} Km/H`;
 
-        const weatherResponse = await fetch(weatherUrl);
+        // Update weather image based on condition
+        if (weatherImg) {
+            const condition = weatherData.current.condition.text.toLowerCase(); // Convert to lowercase for consistency
 
-        // Check for network errors (non-2xx status codes)
-        if (!weatherResponse.ok) {
-            throw new Error(`Failed to fetch weather data: ${weatherResponse.statusText}`);
-        }
-
-        const weatherData = await weatherResponse.json();
-
-        // Check if weather data is available
-        if (weatherData.consolidated_weather && weatherData.consolidated_weather.length > 0) {
-            const currentWeather = weatherData.consolidated_weather[0]; // Get the first day's weather data
-
-            console.log("Weather data received");
-            if (locationNotFound) locationNotFound.style.display = "none";
-            if (weatherBody) weatherBody.style.display = "flex";
-
-            // Update UI with weather data
-            if (temperature) temperature.innerHTML = `${Math.round(currentWeather.the_temp)}°C`;
-            if (description) description.innerHTML = `${currentWeather.weather_state_name}`;
-            if (humidity) humidity.innerHTML = `${currentWeather.humidity}%`;
-            if (windSpeed) windSpeed.innerHTML = `${currentWeather.wind_speed} Km/H`;
-
-            // Update weather image based on condition
-            if (weatherImg) {
-                const condition = currentWeather.weather_state_name.toLowerCase();
-
-                if (condition.includes('cloudy')) {
-                    weatherImg.src = "cloud.png";
-                } else if (condition.includes('sunny') || condition.includes('clear')) {
-                    weatherImg.src = "clear.png";
-                } else if (condition.includes('rain')) {
-                    weatherImg.src = "rain.png";
-                } else if (condition.includes('mist')) {
-                    weatherImg.src = "mist.png";
-                } else if (condition.includes('snow')) {
-                    weatherImg.src = "snow.png";
-                } else {
-                    weatherImg.src = "default.png"; // Handle default or other conditions
-                    console.log('Default image');
-                }
+            if (condition.includes('cloudy')) {
+                weatherImg.src = "cloud.png";
+            } else if (condition.includes('sunny')) {
+                weatherImg.src = "clear.png";
+            } else if (condition.includes('rain')) {
+                weatherImg.src = "rain.png";
+            } else if (condition.includes('mist')) {
+                weatherImg.src = "mist.png";
+            } else if (condition.includes('snow')) {
+                weatherImg.src = "snow.png";
+            } else {
+                weatherImg.src = "default.png"; // Handle default or other conditions
+                console.log('Default image');
             }
         }
+
+        console.log(weatherData);
     } catch (error) {
         console.error("Error fetching weather data:", error);
-
-        // Handle errors gracefully
         if (locationNotFound) locationNotFound.style.display = "flex";
         if (weatherBody) weatherBody.style.display = "none";
-        alert(`An error occurred: ${error.message}`);
     }
 }
 
